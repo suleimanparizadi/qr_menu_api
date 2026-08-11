@@ -27,12 +27,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
 
 
-    username = models.CharField(max_length=125)
+    display_name = models.CharField(max_length=125)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     date_of_birth = models.DateField(null=True, blank=True)
-
-    last_login_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)   
 
@@ -40,7 +38,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     terms_accepted_at = models.DateTimeField(null=True, blank=True)
 
     USERNAME_FIELD = 'phone_number'
-    REQUIRED_FIELDS = ['username']
+    REQUIRED_FIELDS = ['display_name']
 
     objects = UserManager()
 
@@ -61,7 +59,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
     def __str__(self):
-        return f"{self.phone_number}-{self.username}"
+        return f"{self.phone_number}-{self.display_name}"
 
     
     @property
@@ -75,7 +73,6 @@ class User(AbstractBaseUser, PermissionsMixin):
             self.save(update_fields=['is_active', 'updated_at'])
 
         return None
-
 
 
 
