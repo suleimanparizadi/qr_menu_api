@@ -20,7 +20,7 @@ class UserManager(BaseUserManager):
       
 
 
-        phone_number = self._normalize_phone(phone_number)
+        phone_number = self.normalize_phone(phone_number)
 
         user = self.model(
             phone_number = phone_number,
@@ -79,7 +79,7 @@ class UserManager(BaseUserManager):
     
     
     
-    def _normalize_phone(self, phone):
+    def normalize_phone(self, phone):
 
         if phone is None:
             return None
