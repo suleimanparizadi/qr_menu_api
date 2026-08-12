@@ -1,7 +1,8 @@
 from django.contrib.auth.backends import BaseBackend
 from django.contrib.auth import get_user_model
 from apps.accounts.services.otp import OTPService
-from apps.accounts.models.manager import UserManager 
+from apps.accounts.utils.normalizing_phone import normalize_phone
+
 
 User = get_user_model()
 
@@ -16,7 +17,7 @@ class OTPAuthentication(BaseBackend):
             return None
 
 
-        normalized_phone = UserManager.normalize_phone(phone_number)
+        normalized_phone = normalize_phone(phone_number)
         
         otp_service = OTPService(normalized_phone)
         success, message = otp_service.verify_otp(otp_code)

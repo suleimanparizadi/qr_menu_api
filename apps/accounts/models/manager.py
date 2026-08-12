@@ -2,6 +2,7 @@ import re
 
 from django.contrib.auth.models import BaseUserManager
 from django.core.exceptions import ValidationError
+from apps.accounts.utils.normalizing_phone import normalize_phone
 
 
 
@@ -20,7 +21,7 @@ class UserManager(BaseUserManager):
       
 
 
-        phone_number = self.normalize_phone(phone_number)
+        phone_number = normalize_phone(phone_number)
 
         user = self.model(
             phone_number = phone_number,
@@ -77,23 +78,6 @@ class UserManager(BaseUserManager):
         )
 
     
-    
-    
-    def normalize_phone(self, phone):
-
-        if phone is None:
-            return None
-       
-        phone = re.sub(r'\D', '', str(phone))
-
-        if len(phone) != 11:
-            raise ValidationError("Phone number must have exactly 11 digits")
-
-        return phone
-
-
-
-
     def active(self):
         return self.get_queryset().filter(is_active=True)
     
