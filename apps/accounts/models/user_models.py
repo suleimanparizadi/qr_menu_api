@@ -30,7 +30,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     display_name = models.CharField(max_length=125)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
-    date_of_birth = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)   
 
