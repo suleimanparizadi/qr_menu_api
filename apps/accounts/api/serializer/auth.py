@@ -29,9 +29,8 @@ class VerifyLoginOTPSerializer(serializers.Serializer):
         max_length=11,
         validators=[PhoneNumberValidator()]
     )  
-    code = serializers.CharField(
+    code = serializers.IntegerField(
         max_length=6,
-        validators=[OTPCodeValidator()]
     )
 
 
@@ -40,24 +39,16 @@ class InitiateRegistrationSerializer(serializers.Serializer):
         max_length=11,
         validators=[PhoneNumberValidator()]
     )
-    first_name = serializers.CharField(max_length=125)
-    last_name = serializers.CharField(max_length=125)
-    password = serializers.CharField(write_only=True, min_length=4,
+    display_name = serializers.CharField(max_length=125)
+    password = serializers.CharField(write_only=True, min_length=6,
                                      validators=[PasswordValidator()])
     password_confirm = serializers.CharField(write_only=True)
-    email = serializers.EmailField(required=False)
-    date_of_birth = serializers.DateField(required=False)
     
-    def validate_first_name(self, value):
+    def validate_display_name(self, value):
         if not value or not value.strip():
-            raise serializers.ValidationError("First name is required")
+            raise serializers.ValidationError("display_name name is required")
         return value.strip()
-    
-    def validate_last_name(self, value):
-        if not value or not value.strip():
-            raise serializers.ValidationError("Last name is required")
-        return value.strip()
-    
+   
     def validate(self, data):
         if data.get('password') != data.get('password_confirm'):
             raise serializers.ValidationError({
@@ -67,14 +58,12 @@ class InitiateRegistrationSerializer(serializers.Serializer):
         return data
 
 
-class AdminUserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
 
         model = User
         fields = [
-            'id', 'phone_number', 'first_name', 'last_name',
-            'email', 'is_active', 'is_admin', 'date_of_birth',
-            'created_at', 'last_login_at'
+            'id', 'phone_number', 'display_name','is_active','created_at', 
         ]
-        read_only_fields = ['id', 'created_at', 'last_login_at']
+        read_only_fields = ['id', 'created_at']

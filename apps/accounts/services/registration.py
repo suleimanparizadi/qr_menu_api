@@ -1,3 +1,4 @@
+from rest_framework.authtoken.models import Token
 from django.db import transaction, IntegrityError
 from django.contrib.auth import get_user_model
 from apps.accounts.services.otp import OTPService
@@ -38,12 +39,15 @@ class InitiateRegister:
         return success, message
 
 
+
+
+
     def verify_and_create_user(self, code, display_name, password):
 
         success, message = self.otp.verify_otp(code)
 
         if not success:
-            return False, "Unable to create user"
+            return None, "Unable to create user"
 
 
         try:            
@@ -52,11 +56,11 @@ class InitiateRegister:
                 display_name=display_name,
                 password=password
             )
-
+            token, _ = Token.objects.get_or_create(user=user)
             return user, message
 
         except IntegrityError:
-            return False ,'A user is already registered with this phone number'
+            return None ,'A user is already registered with this phone number'
 
 
 
