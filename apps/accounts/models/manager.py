@@ -2,7 +2,7 @@ import re
 
 from django.contrib.auth.models import BaseUserManager
 from django.core.exceptions import ValidationError
-from apps.accounts.utils.normalizing_phone import normalize_phone
+from utils.normalizing_phone import normalize_phone
 
 
 

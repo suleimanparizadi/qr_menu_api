@@ -2,6 +2,8 @@ from rest_framework.authtoken.models import Token
 from django.db import transaction, IntegrityError
 from django.contrib.auth import get_user_model
 from apps.accounts.services.otp import OTPService
+from utils.service_result import ServiceResult
+
 
 
 User = get_user_model()
@@ -25,18 +27,22 @@ class InitiateRegister:
 
          
         if User.objects.select_for_update().filter(phone_number=self.phone_number).first():
-            return False, "this phone number is already registered"
+            return ServiceResult.fail(
+                message="this phone number is already registered"
+            )
 
+            
         if not display_name:
-            return False, "display_name is required"    
-
+            return ServiceResult.fail(
+                message="display_name is required" 
+            )
         if not password:
-            return False, "password is required"    
+            return ServiceResult.fail(
+                message="password is required"
+            )
 
-
-        success, message = self.otp.create_otp()
-
-        return success, message
+        result = self.otp.create_otp()
+        return result
 
 
 
@@ -44,10 +50,12 @@ class InitiateRegister:
 
     def verify_and_create_user(self, code, display_name, password):
 
-        success, message = self.otp.verify_otp(code)
+        result = self.otp.verify_otp(code)
 
-        if not success:
-            return None, "Unable to create user"
+        if not result.success:
+            return ServiceResult.fail(
+                message="Unable to create user"
+            )
 
 
         try:            
@@ -57,10 +65,20 @@ class InitiateRegister:
                 password=password
             )
             token, _ = Token.objects.get_or_create(user=user)
-            return user, message
+
+            return ServiceResult.success(
+                
+                data={'token':token.key},
+                message='user created successfully'
+            )
+            
 
         except IntegrityError:
-            return None ,'A user is already registered with this phone number'
+            return ServiceResult.fail(
+                code="IntegrityError",
+                message='A user is already registered with this phone number'
+            )
+
 
 
 

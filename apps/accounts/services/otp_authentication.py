@@ -1,7 +1,7 @@
 from django.contrib.auth.backends import BaseBackend
 from django.contrib.auth import get_user_model
 from apps.accounts.services.otp import OTPService
-from apps.accounts.utils.normalizing_phone import normalize_phone
+from utils.normalizing_phone import normalize_phone
 
 
 User = get_user_model()

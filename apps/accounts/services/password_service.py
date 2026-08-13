@@ -1,4 +1,6 @@
 from django.contrib.auth import get_user_model
+from utils.service_result import ServiceResult
+
 
 User = get_user_model()
 
@@ -21,15 +23,28 @@ class ChangePasswordService:
 
         
         if not self.user.check_password(old_password):
-            return False, "Current password is incorrect."
+            return ServiceResult.fail(
+                message="Current password is incorrect.",
+                code="INVALID_OLD_PASSWORD"        
+            )
         
         if new_password != confirm_password:
-            return False, "New passwords do not match."
+            return ServiceResult.fail(
+                message= "New passwords do not match.",
+                code="PASSWORD_MISMATCH"
+            )
+            
         
         if old_password == new_password:
-            return False, "New password must be different from current password."
-        
+            return ServiceResult.fail(
+                message="New password must be different from current password.",
+                code="PASSWORD_SAME_AS_OLD"
+            )
+ 
         self.user.set_password(new_password)
         self.user.save(update_fields=['password'])
+
+        return ServiceResult.success(
+            message="Password changed successfully."
+        )
         
-        return True, "Password changed successfully."
