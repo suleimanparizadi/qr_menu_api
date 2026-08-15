@@ -1,6 +1,8 @@
+from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
 from apps.accounts.services.otp import OTPService
 from utils.normalizing_phone import normalize_phone
+from utils.service_result import ServiceResult
 
 
 User = get_user_model()
@@ -27,19 +29,27 @@ class PasswordLoginService:
             user = User.objects.get(phone_number=self.phone_number)        
        
         except User.DoesNotExist:
-            return False, "Invalid phone number or password."        
+            return ServiceResult.fail(
+                message="Invalid phone number or password."
+            )
         
         if not user.is_active:
-            return False, "Invalid phone number or password."
-        
+            return ServiceResult.fail(
+                message="Invalid phone number or password."
+                )        
 
         if not user.check_password(self.password):
-            return False, "Invalid phone number or password."
+            return ServiceResult.fail(
+                message="Invalid phone number or password."
+                )            
         
 
-        
-
-        return user, "you logged in successfully!"
+        token, _ = Token.objects.get_or_create(user=user)
+       
+        return ServiceResult.success(
+            data={'token':token.key},
+            message= "you logged in successfully!"
+        )
     
 
 
@@ -56,28 +66,44 @@ class OTPLoginService:
 
             otp_service = OTPService(self.phone_number)
 
-            success, message = otp_service.create_otp()
-           
-            return success, message
-      
-        return False, "Unable to process request. Please try again later."
+            result = otp_service.create_otp()
+
+            if result.success:           
+                return ServiceResult.success(
+                    message=result.message
+                )
+
+        return ServiceResult.fail(
+            message="Unable to process request. Please try again later."
+        )
             
 
     def verify_otp(self, input_code):
 
 
         otp_service = OTPService(self.phone_number)
-        success, message = otp_service.verify_otp(input_code)
+        result = otp_service.verify_otp(input_code)
 
 
-        if success:
+        if result.success:
 
             try:
                 user = User.objects.get(phone_number=self.phone_number, is_active=True)
             except User.DoesNotExist:
-                return False, "Accounts not found"
+                return ServiceResult.fail(
+                    message="Accounts not found"
+                )
             
-            
-            return user, message
+            token, _ = Token.objects.get_or_create(user=user)
+           
+            return ServiceResult.success(
+                data={'token':token.key},
+                message=result.message
+            )
         
-        return False, message
+        return ServiceResult.fail(
+            message=result.message
+        )
+
+
+    
