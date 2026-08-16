@@ -80,6 +80,79 @@ class InitiateRegister:
             )
 
 
+class Account:
+
+    def __init__(self, user):
+        self.user = user 
 
 
-             
+    def logout(self):
+        
+        Token.objects.get(user=self.user).delete()
+        return ServiceResult.success(
+            message= "User been logged out."
+        )
+
+
+    def changing_display_name(self, display_name):
+
+        self.user.display_name = display_name
+        self.user.save(update_fields=['display_name', 'updated_at'])
+        return ServiceResult.success(
+            message="Display name changed"
+        )
+
+
+
+class ChangePhone_number:
+
+    def __init__(self, user, phone_number):
+
+        self.phone_number = phone_number
+        self.otp = OTPService(phone_number)
+        self.user = user
+
+
+    def send_otp(self):
+
+        if User.objects.filter(phone_number=self.phone_number).exists():
+
+            return ServiceResult.fail(
+                message="This phone number is already registered.",
+                code="PHONE_ALREADY_EXISTS"
+            )
+
+        result = self.otp.create_otp()
+
+        return result
+
+
+
+    def Verify_otp(self, code):
+
+        result = self.otp.verify_otp(code)
+
+        if User.objects.filter(phone_number=self.phone_number).exists():
+
+            return ServiceResult.fail(
+                message="This phone number is already registered.",
+                code="PHONE_ALREADY_EXISTS"
+            )
+
+
+        if result.success:
+            self.user.phone_number = self.phone_number
+            self.user.save(update_fields=['phone_number', 'updated_at'])
+
+            return ServiceResult.success(
+                message="phone number changed successfully",
+                data = {'phone_umber': self.phone_number}
+            )
+
+        return result
+        
+
+    
+
+        
+

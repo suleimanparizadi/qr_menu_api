@@ -2,19 +2,10 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.core.validators import RegexValidator
 from apps.accounts.models.manager import UserManager
-import uuid
 
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-
-
-
-    uuid = models.UUIDField(
-        default=uuid.uuid4,
-        editable=False,
-        unique=True
-    )
 
 
     phone_number = models.CharField(max_length=11, unique=True, 

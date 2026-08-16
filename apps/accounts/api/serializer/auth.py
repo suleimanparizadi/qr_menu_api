@@ -1,9 +1,24 @@
 from rest_framework import serializers
-from .validators import PhoneNumberValidator, OTPCodeValidator, PasswordValidator
+from .validators import PhoneNumberValidator, PasswordValidator
 from django.contrib.auth import get_user_model
 
 
 User = get_user_model()
+
+
+
+class ChangeDisplayNameSerializer(serializers.Serializer):
+
+    display_name = serializers.CharField(max_length=125)
+
+
+
+class ChangePhoneNumberSerializer(serializers.Serializer):
+
+    new_phone_number = serializers.CharField(
+        max_length=11,
+        validators=[PhoneNumberValidator()]
+    )  
 
 
 
@@ -15,11 +30,13 @@ class PasswordLoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
 
+
 class SendLoginOTPSerializer(serializers.Serializer):
     phone_number = serializers.CharField(
         max_length=11,
         validators=[PhoneNumberValidator()]
     )
+
 
 
 class VerifyLoginOTPSerializer(serializers.Serializer):
@@ -29,9 +46,8 @@ class VerifyLoginOTPSerializer(serializers.Serializer):
         max_length=11,
         validators=[PhoneNumberValidator()]
     )  
-    code = serializers.IntegerField(
-        max_length=6,
-    )
+    code = serializers.IntegerField()
+
 
 
 class InitiateRegistrationSerializer(serializers.Serializer):
@@ -56,6 +72,8 @@ class InitiateRegistrationSerializer(serializers.Serializer):
             })
         data.pop('password_confirm', None)
         return data
+
+
 
 
 class UserSerializer(serializers.ModelSerializer):
