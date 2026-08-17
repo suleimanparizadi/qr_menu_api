@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from apps.accounts.api.serializers.validators import PasswordValidator
+from apps.accounts.api.serializer.validators import PasswordValidator
 from django.core.exceptions import ValidationError
 
 
