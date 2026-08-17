@@ -146,7 +146,7 @@ class ChangePhone_number:
 
             return ServiceResult.success(
                 message="phone number changed successfully",
-                data = {'phone_umber': self.phone_number}
+                data = {'phone_number': self.phone_number}
             )
 
         return result

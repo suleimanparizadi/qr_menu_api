@@ -62,7 +62,7 @@ class OTPLoginService:
 
     def send_otp(self):
 
-        if  User.objects.filter(phone_number=self.phone_number, is_active=True).exists():
+        if User.objects.filter(phone_number=self.phone_number, is_active=True).exists():
 
             otp_service = OTPService(self.phone_number)
 
@@ -77,6 +77,8 @@ class OTPLoginService:
             message="Unable to process request. Please try again later."
         )
             
+
+
 
     def verify_otp(self, input_code):
 
