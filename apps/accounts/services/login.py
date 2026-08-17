@@ -5,6 +5,9 @@ from utils.normalizing_phone import normalize_phone
 from utils.service_result import ServiceResult
 
 
+print(Token)  # Should print: <class 'rest_framework.authtoken.models.Token'>
+print(hasattr(Token, 'objects'))  # Should print: True
+
 User = get_user_model()
 
 

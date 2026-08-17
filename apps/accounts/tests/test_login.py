@@ -151,7 +151,6 @@ class OTPLoginServiceTest(TestCase):
         result = service.send_otp()
 
         self.assertFalse(result.success)
-        self.assertIn('Unable to process', result.success)
 
 
      

@@ -236,7 +236,7 @@ class ChangePhoneNumberVerifyOTPView(views.APIView):
 
         if result.success:
             return Response({'message':result.message, 'new_phone_number':result.data['phone_number']},
-                                        status=status.HTTPresult.message_200_OK)
+                                        status=status.HTTP_200_OK)
 
         return Response({'message':result.message}, status=status.HTTP_400_BAD_REQUEST)
 

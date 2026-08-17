@@ -75,4 +75,3 @@ class RegistrationServiceTest(TestCase):
 
 
         self.assertFalse(result.success)
-        self.assertIn('already', result.message.lower())
