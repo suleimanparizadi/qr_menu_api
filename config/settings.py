@@ -11,6 +11,8 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+QR_MENU_BASE_URL = "https://TheWebSiteAddres/menu/"
+
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 
