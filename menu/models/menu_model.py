@@ -41,8 +41,6 @@ class QRMenu(models.Model):
 
 
 
-
-
 class MenuItem(models.Model):
 
     menu = models.ForeignKey(QRMenu, on_delete=models.CASCADE, related_name='items')
