@@ -5,7 +5,11 @@ from io import BytesIO
 from django.conf import settings
 import qrcode
 
+
+
 User = get_user_model()
+
+
 
 
 class QRMenu(models.Model):
@@ -71,9 +75,12 @@ class MenuItem(models.Model):
         return f"{self.item} - {self.section.name} - {self.id}"
 
 
+
+
 class MenuView(models.Model):
     menu = models.ForeignKey(QRMenu, on_delete=models.CASCADE, related_name='views')
     viewed_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['-viewed_at']
+

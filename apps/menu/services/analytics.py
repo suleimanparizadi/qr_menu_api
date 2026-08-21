@@ -47,4 +47,19 @@ class MenuAnalyticsService:
                 )
 
 
+        peak_day = None
+        if views_per_day:
+            peak_day = max(views_per_day, key=lambda x: x['count']) # For each item x in the list, look at x['count']
+                        # views_per_day is a list of dictionaries, not numbers
 
+            return ServiceResult.success(
+                data={
+                    'total_view':total_view,
+                    'today_view':todays_view,
+                    'views_per_day':views_per_day,
+                    'peak_day':peak_day,
+                    'days_analytics': days
+                },
+            message="Analytics retrieved"
+            )
+        

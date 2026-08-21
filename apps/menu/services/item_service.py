@@ -3,7 +3,6 @@ from utils.service_result import ServiceResult
 
 
 
-
 class ItemService:
 
     def __init__(self, user):
@@ -39,4 +38,12 @@ class ItemService:
 
     def delete_item(self, item_id):
 
-        ...
+        try:
+            item = menu_model.MenuItem.objects.get(id=item_id, menu__user=self.user)    
+
+        except menu_model.MenuItem.DoesNotExist:
+            return ServiceResult.fail(
+                message="unable to locate the Item"
+            )
+
+        item.delete()
