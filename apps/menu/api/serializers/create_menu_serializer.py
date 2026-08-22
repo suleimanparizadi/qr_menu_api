@@ -18,16 +18,15 @@ class UpdateMenuSerializer(serializers.Serializer):
 
 
 
-class CreateSectionSerializer(serializers.Serializer):
-    name = serializers.CharField(max_length=225, default="Main")
+class SectionSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=225, required=False)
     start_time = serializers.TimeField(required=False, allow_null=True)
     end_time = serializers.TimeField(required=False, allow_null=True)
-    order = serializers.IntegerField(required=False, default=0)
-
+    order = serializers.IntegerField(required=False)
 
     def validate_name(self, value):
-        if not value or not value.strip():
-            return "Main"
+        if not value.strip():
+            raise serializers.ValidationError("Name cannot be empty")
         return value.strip()
 
 

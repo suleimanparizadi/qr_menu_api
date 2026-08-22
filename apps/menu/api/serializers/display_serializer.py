@@ -2,6 +2,8 @@ from rest_framework import serializers
 from apps.menu.models import menu_model
 
 
+# this serializers are just for being shown in menus 
+
 
 class MenuItemSerializer(serializers.ModelSerializer):
     class Meta:
@@ -21,12 +23,10 @@ class MenuSectionSerializer(serializers.ModelSerializer):
 
 class PublicMenuSerializer(serializers.ModelSerializer):
     # for customers
-    sections = MenuSectionSerializer(many=True, read_only=True)
     
     class Meta:
         model = menu_model.QRMenu
-        fields = ['id', 'title', 'description', 'sections']
-
+        fields = ['id', 'title', 'description',]
 
 
 class MenuSerializer(serializers.ModelSerializer):
