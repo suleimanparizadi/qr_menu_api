@@ -3,9 +3,6 @@ from utils.service_result import ServiceResult
 
 
 
-
-
-
 class SectionService:
 
 

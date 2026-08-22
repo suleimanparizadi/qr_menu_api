@@ -1,0 +1,39 @@
+from rest_framework import serializers
+
+
+
+
+class CreateMenuSerializer(serializers.Serializer):
+    title = serializers.CharField(max_length=225)
+    description = serializers.CharField(max_length=350, required=False, allow_blank=True)
+
+
+
+
+class UpdateMenuSerializer(serializers.Serializer):
+    title = serializers.CharField(max_length=225, required=True)
+    description = serializers.CharField(max_length=350, required=False, allow_blank=True)
+    available = serializers.BooleanField(required=False)
+
+
+
+
+class CreateSectionSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=225, default="Main")
+    start_time = serializers.TimeField(required=False, allow_null=True)
+    end_time = serializers.TimeField(required=False, allow_null=True)
+    order = serializers.IntegerField(required=False, default=0)
+
+
+    def validate_name(self, value):
+        if not value or not value.strip():
+            return "Main"
+        return value.strip()
+
+
+
+class CreateItemSerializer(serializers.Serializer):
+    item = serializers.CharField(max_length=225)
+    description = serializers.CharField(max_length=225, required=False, allow_blank=True)
+    price = serializers.IntegerField(min_value=0)
+    order = serializers.IntegerField(required=False, default=0)
