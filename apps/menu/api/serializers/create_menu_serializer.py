@@ -1,6 +1,5 @@
 from rest_framework import serializers
-
-
+from django.core.exceptions import ValidationError
 
 
 class CreateMenuSerializer(serializers.Serializer):
@@ -31,8 +30,30 @@ class SectionSerializer(serializers.Serializer):
 
 
 
-class CreateItemSerializer(serializers.Serializer):
+
+class ItemInputSerializer(serializers.Serializer):
     item = serializers.CharField(max_length=225)
     description = serializers.CharField(max_length=225, required=False, allow_blank=True)
     price = serializers.IntegerField(min_value=0)
-    order = serializers.IntegerField(required=False, default=0)
+    order = serializers.IntegerField(required=False)
+
+
+
+class AddItemsSerializer(serializers.Serializer):
+    items = ItemInputSerializer(many=True, allow_empty=False)
+    
+    def validate_items(self, value):
+
+        if len(value) > 50:
+            raise serializers.ValidationError("Maximum 50 items per request")
+        
+        return value
+
+
+
+
+class UpdateItemSerializer(serializers.Serializer):
+    item = serializers.CharField(max_length=225, required=False)
+    description = serializers.CharField(max_length=225, required=False, allow_blank=True)
+    price = serializers.IntegerField(min_value=0, required=False)
+    order = serializers.IntegerField(required=False)

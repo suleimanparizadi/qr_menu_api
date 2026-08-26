@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from apps.menu.services import analytics, item_service, menu_service, public_menu, section_service
 from apps.menu.api.serializers import create_menu_serializer, display_serializer, menu_serializer
-from apps.menu.models.menu_model import QRMenu, MenuSection
+from apps.menu.models.menu_model import QRMenu, MenuSection, MenuItem
 
 
 
@@ -125,7 +125,7 @@ class SectionView(views.APIView):
 
     def patch(self, request, section_id):
 
-        section = get_object_or_404(MenuSection, id=section_id, menu__user=request.user)
+        section = get_object_or_404(MenuSection, id=section_id)
 
         serializer = create_menu_serializer.SectionSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -152,3 +152,62 @@ class SectionView(views.APIView):
                          status=status.HTTP_200_OK if result.success else status.HTTP_400_BAD_REQUEST)
 
 
+
+
+
+
+class ItemView(views.APIView):
+
+    permission_classes = [permissions.IsAuthenticated]
+
+
+    def post(self, request, section_id):
+        serializer = create_menu_serializer.AddItemsSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        service = item_service.ItemService(request.user)
+        result = service.add_item(
+            section_id=section_id,
+            items_data=serializer.validated_data['items']
+            )
+
+        if result.success:
+            return Response({'message':result.message, 'items_count':result.data['items_count']},
+                            status=status.HTTP_201_CREATED)
+
+        return Response({'message':result.message}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+
+    def patch(self, request, item_id):
+
+        item = get_object_or_404(MenuItem, id=item_id)
+
+        serializer = create_menu_serializer.UpdateItemSerializer(data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+
+        for field, value in serializer.validated_data.items():
+            setattr (item, field, value)
+
+        item.save(update_fields=list(serializer.validated_data.keys()))
+
+
+        return Response(
+            {'message': 'Item updated successfully'},
+            status=status.HTTP_200_OK
+        )
+
+
+
+    def delete(self, request, item_id):
+
+        service = item_service.ItemService(request.user)
+        result = service.delete_item()
+
+        return Response({'message':result.message},
+                         status=status.HTTP_200_OK if result.success else status.HTTP_400_BAD_REQUEST)
+
+
+
+
+    
