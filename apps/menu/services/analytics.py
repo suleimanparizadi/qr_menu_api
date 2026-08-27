@@ -26,11 +26,12 @@ class MenuAnalyticsService:
                 code="MENU_NOT_FOUND"
             )
 
-        now = timezone.now()
-        start_data = now - timedelta(days=days)
-
         # Total views all time
         total_view = menu.views.count()
+
+
+        now = timezone.now()
+        start_data = now - timedelta(days=days)
 
 
         # Views today

@@ -56,7 +56,8 @@ class MenuView(views.APIView):
         result = service.create_menu(**serializer.validated_data)
 
         if result.success:
-            return Response({'message':result.message, 'menu':serializer.data},
+            menu_serializer = display_serializer.MenuSerializer(result.data['menu'])
+            return Response({'message':result.message, 'menu':menu_serializer.data},
                             status=status.HTTP_201_CREATED)
 
         return Response({'message':result.message}, status=status.HTTP_400_BAD_REQUEST)
@@ -125,7 +126,7 @@ class SectionView(views.APIView):
 
     def patch(self, request, section_id):
 
-        section = get_object_or_404(MenuSection, id=section_id)
+        section = get_object_or_404(MenuSection, id=section_id, menu__user=request.user)
 
         serializer = create_menu_serializer.SectionSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -146,7 +147,7 @@ class SectionView(views.APIView):
     
         service = section_service.SectionService(request.user)
 
-        result = service.delete_sections(section_id)
+        result = service.delete_section(section_id)
 
         return Response({'message':result.message},
                          status=status.HTTP_200_OK if result.success else status.HTTP_400_BAD_REQUEST)
@@ -166,7 +167,7 @@ class ItemView(views.APIView):
         serializer.is_valid(raise_exception=True)
 
         service = item_service.ItemService(request.user)
-        result = service.add_item(
+        result = service.add_items(
             section_id=section_id,
             items_data=serializer.validated_data['items']
             )
@@ -181,7 +182,7 @@ class ItemView(views.APIView):
 
     def patch(self, request, item_id):
 
-        item = get_object_or_404(MenuItem, id=item_id)
+        item = get_object_or_404(MenuItem, id=item_id, section__menu__user=request.user)
 
         serializer = create_menu_serializer.UpdateItemSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -201,13 +202,41 @@ class ItemView(views.APIView):
 
     def delete(self, request, item_id):
 
+
         service = item_service.ItemService(request.user)
-        result = service.delete_item()
+        result = service.delete_item(item_id)
 
         return Response({'message':result.message},
                          status=status.HTTP_200_OK if result.success else status.HTTP_400_BAD_REQUEST)
 
 
 
+
+class MenuAnalyticView(views.APIView):
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, menu_id):
+        # Get days from query params (default 7)
+        days = request.query_params.get('days', 7)
+        
+        try:
+            days = int(days)
+        except (ValueError, TypeError):
+            days = 7
+        
+        # Limit range
+        if days < 1:
+            days = 1
+        if days > 365:
+            days = 365
+        
+        service = analytics.MenuAnalyticsService(request.user)
+        result = service.get_analytics(menu_id, days=days)
+        
+        if result.success:
+            return Response(result.data, status=status.HTTP_200_OK)
+        
+        return Response({'message': result.message}, status=status.HTTP_404_NOT_FOUND)
 
     

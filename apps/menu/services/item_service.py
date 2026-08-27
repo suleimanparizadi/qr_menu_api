@@ -9,7 +9,7 @@ class ItemService:
         self.user = user
 
 
-    def add_item(self, section_id, items_data):
+    def add_items(self, section_id, items_data):
 
         try:
             section = menu_model.MenuSection.objects.get(id=section_id, menu__user=self.user)    
