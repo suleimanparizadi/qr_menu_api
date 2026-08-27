@@ -1,5 +1,4 @@
 from django.contrib import admin
-from django.urls import path
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
@@ -9,8 +8,8 @@ from debug_toolbar.toolbar import debug_toolbar_urls
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/accounts/', include('apps.accounts.api.urls', namespace='accounts')),
-
-
+    path('api/v1/menu/', include('apps.menu.api.urls', namespace='menu')),
+    path('menu/', include('apps.menu.api.public_urls', namespace='public_url')),
 ]+ debug_toolbar_urls()
 
 
