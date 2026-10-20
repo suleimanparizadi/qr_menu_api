@@ -7,7 +7,7 @@ from apps.menu.models.menu_model import QRMenu
 from utils.service_result import ServiceResult
 
 
-@shared_task(autoretry_for=(Exception), retry_backoff=True, retry_kwargs={"max_retries":3})
+@shared_task
 def generate_qr_code(menu_id):
         menu = QRMenu.objects.get(id=menu_id)
         qr_data = f"{settings.QR_MENU_BASE_URL}/menu/{menu.id}/"
@@ -26,11 +26,11 @@ def generate_qr_code(menu_id):
         finally:
               qr_io.close()
 
-        return ServiceResult.success(
-              message="QR code generated successfully",
-              data=menu.id
-        )
-
+        return {
+        "success": True,
+        "message": "QR code generated successfully",
+        "menu_id": menu.id,
+        }
 
 
 
