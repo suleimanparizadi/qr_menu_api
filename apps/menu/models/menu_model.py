@@ -35,7 +35,7 @@ class MenuSection(models.Model):
         ordering = ['order']
 
     def __str__(self):
-        return f"{self.name} - {self.menu.title}"
+        return f"{self.id} - {self.menu.title} - {self.name}"
 
 
 
