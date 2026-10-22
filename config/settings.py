@@ -11,7 +11,9 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-QR_MENU_BASE_URL = "https://TheWebSiteAddres/menu/"
+
+# ONLY FOR DEVELOPMENT TESTS !!!!!!!!!!
+QR_MENU_BASE_URL = "http://127.0.0.1:8000"
 
 
 SECRET_KEY = os.getenv('SECRET_KEY')
@@ -178,7 +180,6 @@ REST_FRAMEWORK = {
 
 
 
-
 # Storage 
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
@@ -202,8 +203,6 @@ STORAGES = {
 
  
 }
-
-
 
 
 

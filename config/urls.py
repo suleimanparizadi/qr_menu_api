@@ -9,7 +9,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/accounts/', include('apps.accounts.api.urls', namespace='accounts')),
     path('api/v1/menu/', include('apps.menu.api.urls', namespace='menu')),
-    #path('menu/', include('apps.menu.api.public_urls', namespace='public_url')),
+    path('menu/', include('apps.menu.api.public_urls', namespace='c')),
 ]+ debug_toolbar_urls()
 
 
