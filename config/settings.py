@@ -190,8 +190,9 @@ AWS_LOCATION = 'qr_menu/'  # Folder name inside bucket
 AWS_DEFAULT_ACL = 'public-read'
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_FILE_OVERWRITE = True  # Allow overwrites since exists() check is disabled
-
-
+AWS_S3_SIGNATURE_VERSION = 's3v4'
+AWS_S3_ADDRESSING_STYLE = 'path'
+AWS_S3_REGION_NAME = 'us-east-1' 
 
 STORAGES = {
     "default": {

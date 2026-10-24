@@ -45,7 +45,7 @@ def cleanup_orphaned_qr_codes():
     Delete S3 QR files that don't belong to any menu.
     Runs every 3 days during low-traffic hours.
     """
-    
+    # 1. Get all QR file names referenced in the database
     db_files = set(
         QRMenu.objects.exclude(qr_code='')
         .exclude(qr_code__isnull=True)
