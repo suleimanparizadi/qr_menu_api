@@ -9,6 +9,11 @@ from django.core.files.base import ContentFile
 from apps.menu.models.menu_model import QRMenu
 
 
+
+logger = logging.getLogger(__name__)
+
+
+
 @shared_task
 def generate_qr_code(menu_id):
         menu = QRMenu.objects.get(id=menu_id)
@@ -36,7 +41,24 @@ def generate_qr_code(menu_id):
 
 
 
-logger = logging.getLogger(__name__)
+
+
+
+@shared_task(
+    autoretry_for=(Exception,),
+    retry_backoff=True,
+    max_retries=5,
+)
+def delete_qr_image(file_name):
+    if not file_name:
+        return {"success": True, "message": "No QR image to delete"}
+
+    default_storage.delete(file_name)
+
+    logger.info("Deleted QR image: %s", file_name)
+    return {"success": True, "file_name": file_name}
+
+
 
 
 @shared_task

@@ -1,8 +1,8 @@
+from django.db import transaction
+
 from apps.menu.models import menu_model
 from utils.service_result import ServiceResult
-from django.db import transaction
-from apps.menu.tasks import generate_qr_code
-
+from apps.menu.tasks import generate_qr_code, delete_qr_image
 
 class MenuService:
 
@@ -50,7 +50,7 @@ class MenuService:
 
 
 
-
+    @transaction.atomic
     def delete_menu(self, menu_id):
 
         try:
@@ -64,8 +64,14 @@ class MenuService:
         if menu.qr_code and menu.qr_code.storage.exists(menu.qr_code.name):
             menu.qr_code.delete(save=False)
 
+        qr_file_name = menu.qr_code.name if menu.qr_code else None
+
         menu.delete()        
 
+        if qr_file_name:
+            transaction.on_commit(
+                lambda:delete_qr_image.delay(qr_file_name)
+            )
 
 
         return ServiceResult.success(
