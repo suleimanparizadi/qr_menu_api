@@ -3,102 +3,114 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from apps.menu.services import analytics, item_service, menu_service, public_menu, section_service
-from apps.menu.api.serializers import create_menu_serializer, display_serializer, menu_serializer
+from apps.menu.api.serializers import create_menu_serializer, display_serializer
 from apps.menu.models.menu_model import QRMenu, MenuSection, MenuItem
-
-
 
 
 User = get_user_model()
 
 
-
 class PublicMenuView(views.APIView):
-
-
     permission_classes = [permissions.AllowAny]
 
     def get(self, request, menu_id):
-
         service = public_menu.PublicMenuService()
         result = service.get_menu(menu_id)
 
         if result.success:
             menu_serializer = display_serializer.PublicMenuSerializer(
-                result.data['menu'])# just serialize the menu
-            
+                result.data['menu']
+            )
             section_serializer = display_serializer.MenuSectionSerializer(
-                result.data['sections'], many=True)# call the queryset by the serializer data
+                result.data['sections'], many=True
+            )
+            return Response({
+                'menu': menu_serializer.data,
+                'sections': section_serializer.data
+            }, status=status.HTTP_200_OK)
 
-                                                                 
-            return Response({'menu':menu_serializer.data,
-                            'sections':section_serializer.data},
-                                                                status=status.HTTP_200_OK)
-
-        return Response({'message':result.message}, status=status.HTTP_404_NOT_FOUND)
-
-
-
+        return Response({'message': result.message}, status=status.HTTP_404_NOT_FOUND)
 
 
 class MenuView(views.APIView):
-
+    """List and create menus for the authenticated user."""
     permission_classes = [permissions.IsAuthenticated]
 
+    def get(self, request):
+        menus = QRMenu.objects.filter(user=request.user).prefetch_related(
+            'sections__items'
+        )
+        serializer = display_serializer.MenuSerializer(menus, many=True)
+        return Response({'menus': serializer.data}, status=status.HTTP_200_OK)
 
-    def post(self ,request):
-
+    def post(self, request):
         serializer = create_menu_serializer.CreateMenuSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         service = menu_service.MenuService(request.user)
-
         result = service.create_menu(**serializer.validated_data)
 
         if result.success:
             menu_serializer = display_serializer.MenuSerializer(result.data['menu'])
-            return Response({'message':result.message, 'menu':menu_serializer.data},
-                            status=status.HTTP_201_CREATED)
+            return Response({
+                'message': result.message,
+                'menu': menu_serializer.data
+            }, status=status.HTTP_201_CREATED)
 
-        return Response({'message':result.message}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message': result.message}, status=status.HTTP_400_BAD_REQUEST)
 
 
+class MenuDetailView(views.APIView):
+    """Retrieve, update, or delete a single menu."""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, menu_id):
+        menu = get_object_or_404(QRMenu, id=menu_id, user=request.user)
+        serializer = display_serializer.MenuSerializer(menu)
+        return Response({'menu': serializer.data}, status=status.HTTP_200_OK)
 
     def patch(self, request, menu_id):
-
         menu = get_object_or_404(QRMenu, id=menu_id, user=request.user)
-        serializer = create_menu_serializer.UpdateMenuSerializer(data=request.data, partial=True)
+        serializer = create_menu_serializer.UpdateMenuSerializer(
+            data=request.data, partial=True
+        )
         serializer.is_valid(raise_exception=True)
 
-
         for field, value in serializer.validated_data.items():
-            setattr (menu, field, value)
+            setattr(menu, field, value)
 
         menu.save()
-
-        return Response({'message': 'Menu updated successfully'}, status=status.HTTP_200_OK) 
-
-
+        return Response({'message': 'Menu updated successfully'}, status=status.HTTP_200_OK)
 
     def delete(self, request, menu_id):
-    
         service = menu_service.MenuService(request.user)
-
         result = service.delete_menu(menu_id)
 
-        return Response({'message':result.message},
-                         status=status.HTTP_200_OK if result.success else status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {'message': result.message},
+            status=status.HTTP_200_OK if result.success else status.HTTP_400_BAD_REQUEST
+        )
 
 
+class MenuPreviewView(views.APIView):
+    """Preview a menu with all sections (no time filtering, no view tracking)."""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, menu_id):
+        menu = get_object_or_404(QRMenu, id=menu_id, user=request.user)
+        sections = menu.sections.all().prefetch_related('items')
+
+        return Response({
+            'menu': display_serializer.PublicMenuSerializer(menu).data,
+            'sections': display_serializer.MenuSectionSerializer(sections, many=True).data
+        }, status=status.HTTP_200_OK)
 
 
 class SectionView(views.APIView):
-
+    """Create, update, or delete menu sections."""
     permission_classes = [permissions.IsAuthenticated]
 
-
     def post(self, request, menu_id):
-
         serializer = create_menu_serializer.SectionSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -109,58 +121,47 @@ class SectionView(views.APIView):
             start_time=serializer.validated_data.get('start_time'),
             end_time=serializer.validated_data.get('end_time'),
             order=serializer.validated_data.get('order', 0)
-            )
-        
+        )
 
         if result.success:
+            section_serializer = display_serializer.MenuSectionSerializer(
+                result.data['section']
+            )
+            return Response({
+                'message': result.message,
+                'section': section_serializer.data
+            }, status=status.HTTP_201_CREATED)
 
-            section_serializer = display_serializer.MenuSectionSerializer(result.data['section'])
-            return Response({'message':result.message, 'section':section_serializer.data},
-                            status=status.HTTP_201_CREATED)
-        
-
-        return Response({'message':result.message}, status=status.HTTP_400_BAD_REQUEST)
-
-
-
+        return Response({'message': result.message}, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self, request, section_id):
-
-        section = get_object_or_404(MenuSection, id=section_id, menu__user=request.user)
-
-        serializer = create_menu_serializer.SectionSerializer(data=request.data, partial=True)
+        section = get_object_or_404(
+            MenuSection, id=section_id, menu__user=request.user
+        )
+        serializer = create_menu_serializer.SectionSerializer(
+            data=request.data, partial=True
+        )
         serializer.is_valid(raise_exception=True)
 
-
         for field, value in serializer.validated_data.items():
-            setattr (section, field, value)
+            setattr(section, field, value)
 
         section.save()
-
-        return Response({'message': 'section updated successfully'}, status=status.HTTP_200_OK) 
-
-
-
-
+        return Response({'message': 'Section updated successfully'}, status=status.HTTP_200_OK)
 
     def delete(self, request, section_id):
-    
         service = section_service.SectionService(request.user)
-
         result = service.delete_section(section_id)
 
-        return Response({'message':result.message},
-                         status=status.HTTP_200_OK if result.success else status.HTTP_400_BAD_REQUEST)
-
-
-
-
+        return Response(
+            {'message': result.message},
+            status=status.HTTP_200_OK if result.success else status.HTTP_400_BAD_REQUEST
+        )
 
 
 class ItemView(views.APIView):
-
+    """Create, update, or delete menu items."""
     permission_classes = [permissions.IsAuthenticated]
-
 
     def post(self, request, section_id):
         serializer = create_menu_serializer.AddItemsSerializer(data=request.data)
@@ -170,73 +171,62 @@ class ItemView(views.APIView):
         result = service.add_items(
             section_id=section_id,
             items_data=serializer.validated_data['items']
-            )
+        )
 
         if result.success:
-            return Response({'message':result.message, 'items_count':result.data['items_count']},
-                            status=status.HTTP_201_CREATED)
+            return Response({
+                'message': result.message,
+                'items_count': result.data['items_count']
+            }, status=status.HTTP_201_CREATED)
 
-        return Response({'message':result.message}, status=status.HTTP_400_BAD_REQUEST)
-        
-
+        return Response({'message': result.message}, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self, request, item_id):
-
-        item = get_object_or_404(MenuItem, id=item_id, section__menu__user=request.user)
-
-        serializer = create_menu_serializer.UpdateItemSerializer(data=request.data, partial=True)
+        item = get_object_or_404(
+            MenuItem, id=item_id, section__menu__user=request.user
+        )
+        serializer = create_menu_serializer.UpdateItemSerializer(
+            data=request.data, partial=True
+        )
         serializer.is_valid(raise_exception=True)
 
         for field, value in serializer.validated_data.items():
-            setattr (item, field, value)
+            setattr(item, field, value)
 
         item.save(update_fields=list(serializer.validated_data.keys()))
-
-
-        return Response(
-            {'message': 'Item updated successfully'},
-            status=status.HTTP_200_OK
-        )
-
-
+        return Response({'message': 'Item updated successfully'}, status=status.HTTP_200_OK)
 
     def delete(self, request, item_id):
-
-
         service = item_service.ItemService(request.user)
         result = service.delete_item(item_id)
 
-        return Response({'message':result.message},
-                         status=status.HTTP_200_OK if result.success else status.HTTP_400_BAD_REQUEST)
-
-
+        return Response(
+            {'message': result.message},
+            status=status.HTTP_200_OK if result.success else status.HTTP_400_BAD_REQUEST
+        )
 
 
 class MenuAnalyticView(views.APIView):
-
+    """View analytics for a menu."""
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, menu_id):
-        # Get days from query params (default 7)
         days = request.query_params.get('days', 7)
-        
+
         try:
             days = int(days)
         except (ValueError, TypeError):
             days = 7
-        
-        # Limit range
+
         if days < 1:
             days = 1
         if days > 365:
             days = 365
-        
+
         service = analytics.MenuAnalyticsService(request.user)
         result = service.get_analytics(menu_id, days=days)
-        
+
         if result.success:
             return Response(result.data, status=status.HTTP_200_OK)
-        
-        return Response({'message': result.message}, status=status.HTTP_404_NOT_FOUND)
 
-    
+        return Response({'message': result.message}, status=status.HTTP_404_NOT_FOUND)
