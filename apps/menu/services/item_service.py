@@ -53,3 +53,6 @@ class ItemService:
             )
 
         item.delete()
+        return ServiceResult.success(
+            message="Item deleted successfully!"
+        )

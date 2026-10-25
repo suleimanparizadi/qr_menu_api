@@ -36,13 +36,13 @@ class MenuAnalyticsService:
 
         # Views today
         todays_view = menu.views.filter(
-            viewed_at__data=now.date()
+            viewed_at__date=now.date()
         ).count()
 
 
         # Views per day for the last N days
         views_per_day = (
-            menu.view.filter(viewed_at__gte=start_data)
+            menu.views.filter(viewed_at__gte=start_data)
             .annotate(data=TruncDate('viewed_at')).values('data').annotate(
                 count=Count('id')).order_by('data')
                 )
@@ -53,14 +53,14 @@ class MenuAnalyticsService:
             peak_day = max(views_per_day, key=lambda x: x['count']) # For each item x in the list, look at x['count']
                         # views_per_day is a list of dictionaries, not numbers
 
-            return ServiceResult.success(
-                data={
-                    'total_view':total_view,
-                    'today_view':todays_view,
-                    'views_per_day':views_per_day,
-                    'peak_day':peak_day,
-                    'days_analytics': days
-                },
-            message="Analytics retrieved"
-            )
+        return ServiceResult.success(
+            data={
+                'total_views':total_view,
+                'today_views':todays_view,
+                'views_per_day':views_per_day,
+                'peak_day':peak_day,
+                'days_analytics': days
+            },
+        message="Analytics retrieved"
+        )
         

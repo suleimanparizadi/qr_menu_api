@@ -1,4 +1,3 @@
-# apps/menu/tests/test_analytics.py
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.utils import timezone
@@ -69,5 +68,5 @@ class MenuAnalyticsServiceTest(TestCase):
         result = self.service.get_analytics(self.menu.id, days=30)
 
         self.assertTrue(result.success)
-        self.assertEqual(result.data['days_analyzed'], 30)
+        self.assertEqual(result.data['days_analytics'], 30)
         self.assertEqual(result.data['total_views'], 3)
