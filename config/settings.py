@@ -13,7 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # ONLY FOR DEVELOPMENT TESTS !!!!!!!!!!
-QR_MENU_BASE_URL = "http://127.0.0.1:8000"
+QR_MENU_BASE_URL = "http://192.168.1.100"
 
 
 SECRET_KEY = os.getenv('SECRET_KEY')
@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'storages',
     'debug_toolbar',
+    'corsheaders',
 
 
     # Local apps
@@ -60,7 +61,14 @@ INSTALLED_APPS = [
 
 
 
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+]
+
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
@@ -72,6 +80,8 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'config.urls'
+
+
 
 TEMPLATES = [
     {

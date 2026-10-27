@@ -9,7 +9,7 @@ app_name = 'accounts'
 urlpatterns = [
 
     path('register/', auth.InitiateRegistrationView.as_view(), name='initiate_register'),
-    path('verify/', auth.VerifyRegisterView.as_view(), name='verify_register'),
+    path('register/verify/', auth.VerifyRegisterView.as_view(), name='verify_register'),
     path('login/password/', auth.LoginPasswordView.as_view(), name='login_password'),
     path('login/send_otp/', auth.SendLoginOTP.as_view(), name='login_send_otp'),
     path('login/verify/', auth.VerifyOTPLogin.as_view(), name='login_verify'),
