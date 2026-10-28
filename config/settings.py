@@ -33,8 +33,11 @@ if not SECRET_KEY:
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '10.149.105.196']
 
+CORS_ALLOWED_ORIGINS = [
+    'http://10.149.105.196:5173',
+]
 # Application definition
 
 INSTALLED_APPS = [
@@ -62,10 +65,7 @@ INSTALLED_APPS = [
 
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-]
+
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',

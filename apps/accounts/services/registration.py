@@ -53,9 +53,7 @@ class InitiateRegister:
         result = self.otp.verify_otp(code)
 
         if not result.success:
-            return ServiceResult.fail(
-                message="Unable to create user"
-            )
+            return result
 
 
         try:            
