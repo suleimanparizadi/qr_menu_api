@@ -33,12 +33,21 @@ if not SECRET_KEY:
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '10.149.105.196']
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '192.168.1.100',
+]
 
 CORS_ALLOWED_ORIGINS = [
-    'http://10.149.105.196:5173',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://192.168.1.100:5173',
 ]
-# Application definition
+
+CORS_ALLOW_CREDENTIALS = True
+
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -62,9 +71,6 @@ INSTALLED_APPS = [
 
 ]
 
-
-
-CORS_ALLOW_CREDENTIALS = True
 
 
 MIDDLEWARE = [
@@ -202,7 +208,7 @@ AWS_S3_SIGNATURE_VERSION = 's3v4'
 AWS_S3_ADDRESSING_STYLE = 'path'
 AWS_REQUEST_CHECKSUM_CALCULATION = "WHEN_REQUIRED"
 AWS_RESPONSE_CHECKSUM_VALIDATION = "WHEN_REQUIRED"
-
+AWS_QUERYSTRING_AUTH = False
 
 STORAGES = {
     "default": {

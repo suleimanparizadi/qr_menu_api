@@ -32,8 +32,18 @@ class PublicMenuSerializer(serializers.ModelSerializer):
 class MenuSerializer(serializers.ModelSerializer):
     # for menu owner
     sections = MenuSectionSerializer(many=True, read_only=True)
-    
+    qr_code = serializers.SerializerMethodField()
     class Meta:
         model = menu_model.QRMenu
         fields = ['id', 'title', 'description', 'qr_code', 'available', 'sections', 'created_at', 'updated_at']
 
+
+
+
+    def get_qr_code(self, obj):
+        if obj.qr_code:
+            request = self.context.get('request')
+            if request is not None:
+                return request.build_absolute_uri(obj.qr_code.url)
+            return obj.qr_code.url
+        return None

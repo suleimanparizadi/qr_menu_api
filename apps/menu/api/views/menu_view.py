@@ -19,7 +19,8 @@ class PublicMenuView(views.APIView):
 
         if result.success:
             menu_serializer = display_serializer.PublicMenuSerializer(
-                result.data['menu']
+                result.data['menu'],
+                context={'request': request}
             )
             section_serializer = display_serializer.MenuSectionSerializer(
                 result.data['sections'], many=True
@@ -40,8 +41,10 @@ class MenuView(views.APIView):
         menus = QRMenu.objects.filter(user=request.user).prefetch_related(
             'sections__items'
         )
-        serializer = display_serializer.MenuSerializer(menus, many=True)
+        serializer = display_serializer.MenuSerializer(menus, many=True, context={'request':request})
         return Response({'menus': serializer.data}, status=status.HTTP_200_OK)
+
+
 
     def post(self, request):
         serializer = create_menu_serializer.CreateMenuSerializer(data=request.data)
@@ -51,7 +54,7 @@ class MenuView(views.APIView):
         result = service.create_menu(**serializer.validated_data)
 
         if result.success:
-            menu_serializer = display_serializer.MenuSerializer(result.data['menu'])
+            menu_serializer = display_serializer.MenuSerializer(result.data['menu'], context={'request':request})
             return Response({
                 'message': result.message,
                 'menu': menu_serializer.data
@@ -66,7 +69,7 @@ class MenuDetailView(views.APIView):
 
     def get(self, request, menu_id):
         menu = get_object_or_404(QRMenu, id=menu_id, user=request.user)
-        serializer = display_serializer.MenuSerializer(menu)
+        serializer = display_serializer.MenuSerializer(menu ,context={'request': request})
         return Response({'menu': serializer.data}, status=status.HTTP_200_OK)
 
     def patch(self, request, menu_id):
