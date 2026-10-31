@@ -13,8 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # ONLY FOR DEVELOPMENT TESTS !!!!!!!!!!
-QR_MENU_BASE_URL = "http://192.168.1.100"
-
+QR_MENU_BASE_URL='http://10.40.108.211:5173'
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 
@@ -33,17 +32,9 @@ if not SECRET_KEY:
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    '192.168.1.100',
-]
+ALLOWED_HOSTS = ['*']
 
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-    'http://192.168.1.100:5173',
-]
+CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_CREDENTIALS = True
 
